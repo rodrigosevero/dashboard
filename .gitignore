@@ -1,0 +1,46 @@
+# Moodle Dashboard Plugin - .gitignore
+
+## Sistema Operacional
+.DS_Store
+Thumbs.db
+*~
+
+## Editores
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+
+## Desenvolvimento
+node_modules/
+vendor/
+*.log
+
+## Arquivos temporários
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+## Arquivos de debug e desenvolvimento
+debug*.php
+test*.php
+experimental*.php
+playground*.php
+
+## Cache
+cache/
+.cache/
+
+## Configurações locais
+config-local.php
+.env*
+
+## Backups
+*.backup
+backup/
+
+## Específico do projeto
+dashboard-debug.log
+performance.log
