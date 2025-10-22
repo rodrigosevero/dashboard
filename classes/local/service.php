@@ -8,83 +8,41 @@ class service {
         global $CFG, $DB;
         require_once($CFG->libdir . '/enrollib.php');
 
-        // Cursos em andamento do usuário.
-        $courses = enrol_get_users_courses($user->id, true, 'id,shortname,fullname,startdate,enddate,visible');
+        // Cursos em andamento do usuário com categorias.
+        $courses = enrol_get_users_courses($user->id, true, 'id,shortname,fullname,startdate,enddate,visible,category');
         $coursesarr = [];
         $courseids = [];
+        $coursesByCategory = [];
+        
         foreach ($courses as $c) {
             if (!$c->visible) { continue; }
-            $coursesarr[] = [
+            
+            // Buscar categoria do curso
+            $category = $DB->get_record('course_categories', ['id' => $c->category], 'id,name,path');
+            $categoryName = $category ? format_string($category->name) : get_string('uncategorized', 'moodle');
+            
+            // Inicializar array da categoria se não existir
+            if (!isset($coursesByCategory[$categoryName])) {
+                $coursesByCategory[$categoryName] = [];
+            }
+            
+            // Adicionar curso à categoria
+            $coursesByCategory[$categoryName][] = [
                 'id' => $c->id,
                 'fullname' => format_string($c->fullname),
                 'url' => (new \moodle_url('/course/view.php', ['id' => $c->id]))->out(false),
             ];
+            
             $courseids[] = $c->id;
         }
-
-                // Eventos próximos (próximos 14 dias) - com deduplicação inteligente.
-        $eventsarr = [];
-        $now = time();
-        $timeend = $now + (14 * 86400); // 14 dias.
-
-        list($inSql, $inParams) = empty($courseids)
-            ? ['', []]
-            : $DB->get_in_or_equal($courseids, \SQL_PARAMS_NAMED, 'cid');
-
-        $where = '(timestart BETWEEN :tstart AND :tend) AND (visible = 1)';
-        $params = ['tstart' => $now, 'tend' => $timeend];
-
-        // Buscar eventos com informações extras para deduplicação (incluindo modulename)
-        $selectfields = 'id,name,timestart,courseid,eventtype,instance,modulename';
         
-        // Eventos do usuário.
-        $userwhere = $where . ' AND (userid = :uid)';
-        $userparams = $params + ['uid' => $user->id];
-        $userevents = $DB->get_records_select('event', $userwhere, $userparams, 'timestart ASC', $selectfields);
-
-        // Eventos por curso (se houver cursos).
-        $courseevents = [];
-        if (!empty($courseids)) {
-            $coursewhere = $where . ' AND (courseid ' . $inSql . ')';
-            $courseparams = $params + $inParams;
-            $courseevents = $DB->get_records_select('event', $coursewhere, $courseparams, 'timestart ASC', $selectfields);
-        }
-
-        // Aplicar deduplicação inteligente
-        $allevents = array_merge(array_values($userevents), array_values($courseevents));
-        $cleanedEvents = self::deduplicate_events($allevents);
-        
-        // Limitar e formatar eventos
-        $limitedEvents = array_slice($cleanedEvents, 0, 20);
-        foreach ($limitedEvents as $e) {
-            // Gerar URL correta baseada no tipo de evento
-            $url = '#';
-            if ($e->modulename === 'assign' && !empty($e->instance)) {
-                // Para eventos de assign, buscar o course_module correto
-                $cm = $DB->get_record_sql(
-                    "SELECT cm.id 
-                     FROM {course_modules} cm 
-                     JOIN {modules} m ON m.id = cm.module 
-                     WHERE cm.instance = ? AND cm.course = ? AND m.name = 'assign'",
-                    [$e->instance, $e->courseid]
-                );
-                
-                if ($cm) {
-                    $url = (new \moodle_url('/mod/assign/view.php', ['id' => $cm->id]))->out(false);
-                } else {
-                    // Fallback para curso se course_module não existir
-                    $url = (new \moodle_url('/course/view.php', ['id' => $e->courseid]))->out(false);
-                }
-            } elseif (!empty($e->courseid)) {
-                // Para outros eventos, ir para o curso
-                $url = (new \moodle_url('/course/view.php', ['id' => $e->courseid]))->out(false);
-            }
-            
-            $eventsarr[] = [
-                'name' => format_string($e->name),
-                'time' => userdate($e->timestart, get_string('strftimedatetime', 'langconfig')),
-                'url'  => $url,
-                'courseid' => $e->courseid ?? null,
+        // Ordenar categorias alfabeticamente e converter para formato do template
+        ksort($coursesByCategory);
+        foreach ($coursesByCategory as $categoryName => $courses) {
+            $coursesarr[] = [
+                'categoryname' => $categoryName,
+                'courses' => $courses,
+                'coursecount' => count($courses)
             ];
         }
 
@@ -157,8 +115,9 @@ class service {
             'hours' => (string) get_config('local_dashboard', 'supporthours'),
         ];
 
-        // Conversas não lidas (com cache para performance).
+        // Conversas não lidas e últimas mensagens (com cache para performance).
         $unread = 0;
+        $recent_messages = [];
         try {
             if (class_exists('core_message\\api')) {
                 // Tentar buscar do cache primeiro
@@ -172,15 +131,21 @@ class service {
                     $unread = self::count_unread_conversations_custom($user->id);
                     $cache->set($cachekey, $unread);
                 }
+                
+                // Buscar últimas mensagens (sempre busca fresco, não cacheia por ser mais dinâmico)
+                $recent_messages = self::get_recent_messages($user->id, 5); // Últimas 5 mensagens
             }
         } catch (\Throwable $e) {
             $unread = 0;
+            $recent_messages = [];
         }
 
 
 
         // Atividades pendentes (assign) nos próximos 14 dias
         $pending = [];
+        $now = time();
+        $timeend = $now + (14 * 86400); // 14 dias
         try {
             require_once($CFG->dirroot . '/mod/assign/locallib.php');
             if (!empty($courseids)) {
@@ -211,8 +176,9 @@ class service {
 
         return [
             'courses' => $coursesarr,
-            'events'  => $eventsarr,
+            'coursesempty' => empty($coursesarr),
             'unread'  => $unread,
+            'recent_messages' => $recent_messages,
             'announcements' => $announcements,
             'support' => $support,
             'pending' => $pending,
@@ -220,129 +186,113 @@ class service {
     }
 
     /**
-     * Remove eventos duplicados e melhora nomes para melhor UX
+     * Busca as mensagens mais recentes do usuário
      * 
-     * @param array $events Lista de eventos brutos
-     * @return array Lista de eventos limpos e deduplcados
+     * @param int $userid ID do usuário
+     * @param int $limit Número máximo de mensagens (padrão: 5)
+     * @return array Lista de mensagens recentes
      */
-    private static function deduplicate_events($events) {
-        $groups = [];
-        $standalone = [];
+    private static function get_recent_messages($userid, $limit = 5) {
+        global $DB;
         
-        // Agrupar eventos por atividade (assign)
-        foreach ($events as $event) {
-            if ($event->modulename === 'assign' && !empty($event->instance)) {
-                // Agrupar eventos de assign por instance + course
-                $groupkey = "assign_{$event->instance}_{$event->courseid}";
+        try {
+            // Buscar as últimas conversas do usuário com a mensagem mais recente
+            $sql = "SELECT DISTINCT 
+                        mc.id as conversationid,
+                        mc.name as conversationname,
+                        mc.type as conversationtype,
+                        m.id as messageid,
+                        m.subject,
+                        m.fullmessage,
+                        m.timecreated,
+                        m.useridfrom,
+                        sender.firstname as senderfirstname,
+                        sender.lastname as senderlastname,
+                        sender.picture as senderpicture,
+                        sender.imagealt as senderimagealt,
+                        sender.email as senderemail
+                    FROM {message_conversations} mc
+                    JOIN {message_conversation_members} mcm ON mcm.conversationid = mc.id
+                    JOIN {messages} m ON m.conversationid = mc.id
+                    JOIN {user} sender ON sender.id = m.useridfrom
+                    WHERE mcm.userid = :userid
+                      AND m.id = (
+                          SELECT MAX(m2.id) 
+                          FROM {messages} m2 
+                          WHERE m2.conversationid = mc.id
+                      )
+                    ORDER BY m.timecreated DESC
+                    LIMIT :limit";
+            
+            $messages = $DB->get_records_sql($sql, [
+                'userid' => $userid,
+                'limit' => $limit
+            ]);
+            
+            $result = [];
+            foreach ($messages as $msg) {
+                // Determinar se é conversa individual ou grupo
+                $isGroup = ($msg->conversationtype == \core_message\api::MESSAGE_CONVERSATION_TYPE_GROUP);
+                $conversationName = '';
                 
-                if (!isset($groups[$groupkey])) {
-                    $groups[$groupkey] = [];
+                if ($isGroup) {
+                    $conversationName = format_string($msg->conversationname ?: 'Grupo');
+                } else {
+                    // Para conversa individual, usar nome do remetente
+                    $conversationName = fullname($msg);
                 }
-                $groups[$groupkey][] = $event;
-            } else {
-                // Outros eventos ficam soltos
-                $standalone[] = $event;
+                
+                // Encurtar mensagem se muito longa
+                $messageText = strip_tags($msg->fullmessage);
+                $messageText = shorten_text($messageText, 80);
+                
+                // Verificar se mensagem é não lida para este usuário
+                $isUnread = !$DB->record_exists('message_user_actions', [
+                    'userid' => $userid,
+                    'messageid' => $msg->messageid,
+                    'action' => \core_message\api::MESSAGE_ACTION_READ
+                ]);
+                
+                $result[] = [
+                    'conversationid' => $msg->conversationid,
+                    'conversationname' => $conversationName,
+                    'messagetext' => $messageText,
+                    'timeago' => self::time_ago($msg->timecreated),
+                    'isunread' => $isUnread,
+                    'url' => (new \moodle_url('/message/index.php', ['id' => $msg->conversationid]))->out(false),
+                    'sendername' => ($msg->useridfrom != $userid) ? fullname($msg) : 'Você'
+                ];
             }
+            
+            return $result;
+            
+        } catch (\Throwable $e) {
+            return [];
         }
-        
-        $result = [];
-        
-        // Para cada grupo de assign, escolher o melhor representante
-        foreach ($groups as $groupkey => $groupEvents) {
-            $best = self::choose_best_assign_event($groupEvents);
-            if ($best) {
-                $result[] = $best;
-            }
-        }
-        
-        // Adicionar eventos standalone com nomes melhorados
-        foreach ($standalone as $event) {
-            $event->name = self::improve_event_name($event);
-            $result[] = $event;
-        }
-        
-        // Ordenar por data
-        usort($result, function($a, $b) {
-            return $a->timestart - $b->timestart;
-        });
-        
-        return $result;
     }
 
     /**
-     * Escolher o melhor evento para representar um grupo de assign
+     * Converte timestamp em formato "tempo atrás"
      * 
-     * @param array $events Eventos do mesmo assign
-     * @return object|null Melhor evento ou null
+     * @param int $timestamp
+     * @return string
      */
-    private static function choose_best_assign_event($events) {
-        if (empty($events)) {
-            return null;
-        }
+    private static function time_ago($timestamp) {
+        $diff = time() - $timestamp;
         
-        $due = null;
-        $gradingdue = null;
-        $other = null;
-        
-        // Separar por tipo
-        foreach ($events as $event) {
-            switch ($event->eventtype) {
-                case 'due':
-                    $due = $event;
-                    break;
-                case 'gradingdue':
-                    $gradingdue = $event;
-                    break;
-                default:
-                    $other = $event;
-                    break;
-            }
-        }
-        
-        // Prioridade: due > other > gradingdue
-        // (prazos de entrega são mais importantes para alunos)
-        $chosen = $due ?? $other ?? $gradingdue;
-        
-        if ($chosen) {
-            // Melhorar o nome do evento escolhido
-            if ($chosen->eventtype === 'due') {
-                // Pegar nome mais limpo da tarefa
-                $cleanName = preg_replace('/\s+está marcado\(a\) para esta data$/', '', $chosen->name);
-                $chosen->name = "📝 Entrega: " . $cleanName;
-            } elseif ($chosen->eventtype === 'gradingdue') {
-                $cleanName = preg_replace('/\s+está com avaliação marcada para esta data$/', '', $chosen->name);
-                $chosen->name = "✅ Correção: " . $cleanName;
-            }
-        }
-        
-        return $chosen;
-    }
-
-    /**
-     * Melhorar nomes de eventos para melhor clareza
-     * 
-     * @param object $event Evento
-     * @return string Nome melhorado
-     */
-    private static function improve_event_name($event) {
-        $name = $event->name;
-        
-        // Remover frases genéricas
-        $name = preg_replace('/\s+está marcado\(a\) para esta data$/', '', $name);
-        $name = preg_replace('/\s+está com avaliação marcada para esta data$/', '', $name);
-        
-        // Adicionar emoji baseado no tipo
-        switch ($event->eventtype) {
-            case 'open':
-                return "🔓 Abre: " . $name;
-            case 'close':
-                return "🔒 Fecha: " . $name;
-            case 'due':
-                return "📝 Prazo: " . $name;
-            case 'gradingdue':
-                return "✅ Correção: " . $name;
-            default:
-                return "📅 " . $name;
+        if ($diff < 60) {
+            return 'agora';
+        } elseif ($diff < 3600) {
+            $minutes = floor($diff / 60);
+            return $minutes . 'min';
+        } elseif ($diff < 86400) {
+            $hours = floor($diff / 3600);
+            return $hours . 'h';
+        } elseif ($diff < 604800) {
+            $days = floor($diff / 86400);
+            return $days . 'd';
+        } else {
+            return userdate($timestamp, '%d/%m');
         }
     }
 

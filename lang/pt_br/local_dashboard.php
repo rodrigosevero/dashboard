@@ -32,6 +32,10 @@ $string['pending'] = 'Atividades pendentes';
 $string['nopending'] = 'Nenhuma atividade pendente.';
 $string['due'] = 'Vencimento';
 
+// Mensagens
+$string['nomessages'] = 'Nenhuma mensagem recente.';
+$string['goto_messages'] = 'Ver todas as mensagens';
+
 // Novas configurações
 $string['maxannouncements'] = 'Máximo de anúncios';
 $string['maxannouncements_desc'] = 'Número máximo de anúncios a exibir no dashboard (padrão: 3)';

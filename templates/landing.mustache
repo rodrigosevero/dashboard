@@ -9,10 +9,14 @@
     <section class="pp-card">
       <h3>📚 {{#str}} mycourses, local_dashboard {{/str}}</h3>
       {{#courses}}
-        <a class="pp-item" href="{{url}}"><span class="pp-item-title">{{fullname}}</span></a>
+        <div class="pp-category-group">
+          <h4 class="pp-category-title">{{categoryname}} ({{coursecount}})</h4>
+          {{#courses}}
+            <a class="pp-item" href="{{url}}"><span class="pp-item-title">{{fullname}}</span></a>
+          {{/courses}}
+        </div>
       {{/courses}}
       {{#coursesempty}}<p class="pp-empty">{{#str}} nocourses, local_dashboard {{/str}}</p>{{/coursesempty}}
-      <div class="pp-cta"><a class="pp-button" href="{{mycoursesurl}}">{{#str}} goto_mycourses, local_dashboard {{/str}}</a></div>
     </section>
 
     <!-- Atividades pendentes (único card) -->
@@ -27,43 +31,63 @@
       {{^pending}}<p class="pp-empty">{{#str}} nopending, local_dashboard {{/str}}</p>{{/pending}}
     </section>
 
-    <!-- Próximos eventos -->
-    <section class="pp-card">
-      <h3>📅 {{#str}} upcoming, local_dashboard {{/str}}</h3>
-      {{#events}}
-        <a class="pp-item" href="{{url}}"><span class="pp-item-title">{{name}}</span><span class="pp-item-meta">{{time}}</span></a>
-      {{/events}}
-      {{#eventsempty}}<p class="pp-empty">{{#str}} noevents, local_dashboard {{/str}}</p>{{/eventsempty}}
-    </section>
-
     <!-- Mensagens -->
     <section class="pp-card">
-      <h3>📬 {{#str}} messages, local_dashboard {{/str}}</h3>
-      <p class="pp-kpi">{{unread}}</p>
-      <p class="pp-muted">{{#str}} unread_hint, local_dashboard {{/str}}</p>
+      <h3>📬 {{#str}} messages, local_dashboard {{/str}} 
+        {{#unread}}<span class="pp-badge">{{unread}}</span>{{/unread}}
+      </h3>
+      
+      <div class="pp-message-summary">
+        <p class="pp-kpi">{{unread}}</p>
+        <p class="pp-muted">{{#str}} unread_hint, local_dashboard {{/str}}</p>
+      </div>
+      
+      {{#recent_messages}}
+        <a class="pp-item {{#isunread}}pp-item-unread{{/isunread}}" href="{{url}}">
+          <div class="pp-message-content">
+            <span class="pp-item-title">{{conversationname}}</span>
+            <span class="pp-message-text">{{messagetext}}</span>
+          </div>
+          <div class="pp-message-meta">
+            <span class="pp-item-meta">{{timeago}}</span>
+            {{#isunread}}<span class="pp-unread-dot"></span>{{/isunread}}
+          </div>
+        </a>
+      {{/recent_messages}}
+      
+      {{^recent_messages}}
+        <p class="pp-empty">{{#str}} nomessages, local_dashboard {{/str}}</p>
+      {{/recent_messages}}
+      
+      <div class="pp-cta">
+        <a class="pp-button" href="/message/index.php">{{#str}} goto_messages, local_dashboard {{/str}}</a>
+      </div>
     </section>
 
-    <!-- Informações e avisos -->
-    <section class="pp-card">
-      <h3>📢 {{#str}} announcements, local_dashboard {{/str}}</h3>
-      {{#announcements}}
-        <a class="pp-item" href="{{url}}"><span class="pp-item-title">{{title}}</span><span class="pp-item-meta">{{time}}</span></a>
-        <p class="pp-muted" style="margin:4px 0 10px 8px;">{{excerpt}}</p>
-      {{/announcements}}
-      {{^announcements}}<p class="pp-empty">{{#str}} noann, local_dashboard {{/str}}</p>{{/announcements}}
-    </section>
+    <!-- Grid 2 colunas para Informações e Suporte -->
+    <div class="pp-two-cols">
+      <!-- Informações e avisos -->
+      <section class="pp-card">
+        <h3>📢 {{#str}} announcements, local_dashboard {{/str}}</h3>
+        {{#announcements}}
+          <a class="pp-item" href="{{url}}"><span class="pp-item-title">{{title}}</span><span class="pp-item-meta">{{time}}</span></a>
+          <p class="pp-muted" style="margin:4px 0 10px 8px;">{{excerpt}}</p>
+        {{/announcements}}
+        {{^announcements}}<p class="pp-empty">{{#str}} noann, local_dashboard {{/str}}</p>{{/announcements}}
+      </section>
 
-    <!-- Suporte técnico -->
-    <section class="pp-card">
-      <h3>🛠️ {{#str}} support, local_dashboard {{/str}}</h3>
-      <ul style="list-style:none;padding-left:0;margin:0;">
-        {{#support.name}}<li><strong>{{.}}</strong></li>{{/support.name}}
-        {{#support.hours}}<li>{{#str}} hours, local_dashboard {{/str}}: {{.}}</li>{{/support.hours}}
-        {{#support.email}}<li>Email: <a href="mailto:{{.}}">{{.}}</a></li>{{/support.email}}
-        {{#support.phone}}<li>Telefone: {{.}}</li>{{/support.phone}}
-        {{#support.whatsapp}}<li>WhatsApp: <a href="{{.}}" target="_blank" rel="noopener">{{.}}</a></li>{{/support.whatsapp}}
-        {{#support.helpdesk}}<li>Helpdesk: <a href="{{.}}" target="_blank" rel="noopener">{{.}}</a></li>{{/support.helpdesk}}
-      </ul>
-    </section>
+      <!-- Suporte técnico -->
+      <section class="pp-card">
+        <h3>🛠️ {{#str}} support, local_dashboard {{/str}}</h3>
+        <ul style="list-style:none;padding-left:0;margin:0;">
+          {{#support.name}}<li><strong>{{.}}</strong></li>{{/support.name}}
+          {{#support.hours}}<li>{{#str}} hours, local_dashboard {{/str}}: {{.}}</li>{{/support.hours}}
+          {{#support.email}}<li>Email: <a href="mailto:{{.}}">{{.}}</a></li>{{/support.email}}
+          {{#support.phone}}<li>Telefone: {{.}}</li>{{/support.phone}}
+          {{#support.whatsapp}}<li>WhatsApp: <a href="{{.}}" target="_blank" rel="noopener">{{.}}</a></li>{{/support.whatsapp}}
+          {{#support.helpdesk}}<li>Helpdesk: <a href="{{.}}" target="_blank" rel="noopener">{{.}}</a></li>{{/support.helpdesk}}
+        </ul>
+      </section>
+    </div>
   </div>
 </div>

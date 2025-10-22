@@ -31,3 +31,7 @@ $string['hours'] = 'Hours';
 $string['pending'] = 'Pending activities';
 $string['nopending'] = 'No pending activities.';
 $string['due'] = 'Due';
+
+// Messages
+$string['nomessages'] = 'No recent messages.';
+$string['goto_messages'] = 'View all messages';
