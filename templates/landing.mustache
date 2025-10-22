@@ -19,7 +19,28 @@
       {{#coursesempty}}<p class="pp-empty">{{#str}} nocourses, local_dashboard {{/str}}</p>{{/coursesempty}}
     </section>
 
-    <!-- Informações e avisos -->
+    <!-- Mensagens -->
+    <section class="pp-card">
+      <h3>💬 {{#str}} messages, local_dashboard {{/str}}</h3>
+      
+      <div class="pp-messages-summary">
+        <p class="pp-total-conversations">{{totalunreadconversations}} conversas com mensagens não lidas</p>
+      </div>
+      
+      {{#messages}}
+        <a class="pp-message-item" href="{{url}}">
+          <div class="pp-message-header">
+            <span class="pp-message-name">{{name}}</span>
+            {{#unread}}<span class="pp-message-unread">{{unreadcount}}</span>{{/unread}}
+          </div>
+          <div class="pp-message-preview"><span class="pp-message-sender">{{sendername}}</span>{{lastmessage}}</div>
+          <div class="pp-message-time">{{timeago}}</div>
+        </a>
+      {{/messages}}
+      {{#messagesempty}}<p class="pp-empty">Nenhuma conversa encontrada.</p>{{/messagesempty}}
+    </section>
+
+    <!-- Calendário Acadêmico -->
     <section class="pp-card">
       <h3>📅 {{#str}} announcements, local_dashboard {{/str}}</h3>
       

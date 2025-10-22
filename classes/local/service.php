@@ -91,11 +91,83 @@ class service {
             }
         }
 
+        // Mensagens do usuário
+        $messages = [];
+        $totalunreadconversations = 0;
+        
+        if (file_exists($CFG->dirroot . '/message/lib.php')) {
+            require_once($CFG->dirroot . '/message/lib.php');
+            
+            // Buscar todas as conversas do usuário
+            $conversations = \core_message\api::get_conversations($user->id, 0, 50);
+            
+            // Contar conversas com mensagens não lidas
+            foreach ($conversations as $conversation) {
+                if ($conversation->unreadcount > 0) {
+                    $totalunreadconversations++;
+                }
+            }
+            
+            // Buscar detalhes das últimas 5 conversas (independente de serem lidas)
+            // As conversas já vêm ordenadas por última atividade
+            foreach (array_slice($conversations, 0, 5) as $conversation) {
+                $members = \core_message\api::get_conversation_members($user->id, $conversation->id);
+                
+                // Encontrar o outro usuário na conversa
+                $otheruser = null;
+                foreach ($members as $member) {
+                    if ($member->id != $user->id) {
+                        $otheruser = $member;
+                        break;
+                    }
+                }
+                
+                if ($otheruser) {
+                    // Buscar a última mensagem da conversa
+                    // Parâmetros: userid, conversationid, limitfrom, limitnum, sort, timefrom
+                    // sort = 'timecreated DESC' para pegar a mais recente primeiro
+                    $lastmessages = \core_message\api::get_conversation_messages($user->id, $conversation->id, 0, 1, 'timecreated DESC', 0);
+                    $lastmessage = !empty($lastmessages['messages']) ? reset($lastmessages['messages']) : null;
+                    
+                    // Determinar quem enviou a última mensagem
+                    $sender_name = '';
+                    $message_text = 'Nova mensagem';
+                    
+                    if ($lastmessage) {
+                        $message_text = format_string($lastmessage->text);
+                        
+                        // Verificar se foi o usuário atual ou o outro usuário que enviou
+                        if ($lastmessage->useridfrom == $user->id) {
+                            $sender_name = 'Você: ';
+                        } else {
+                            // Buscar dados do remetente
+                            $sender = $DB->get_record('user', ['id' => $lastmessage->useridfrom], 'id,firstname,lastname');
+                            $sender_name = $sender ? fullname($sender) . ': ' : '';
+                        }
+                    }
+                    
+                    $messages[] = [
+                        'id' => $conversation->id,
+                        'name' => fullname($otheruser),
+                        'lastmessage' => $message_text,
+                        'sendername' => $sender_name,
+                        'timeago' => $lastmessage ? userdate($lastmessage->timecreated, get_string('strftimerecent')) : '',
+                        'unread' => $conversation->unreadcount > 0, // True se tem mensagens não lidas
+                        'unreadcount' => $conversation->unreadcount,
+                        'url' => $CFG->wwwroot . '/message/index.php?id=' . $otheruser->id
+                    ];
+                }
+            }
+        }
+
         return [
             'courses' => $coursesarr,
             'coursesempty' => empty($coursesarr),
             'announcements' => $announcements,
             'banners' => $banners,
+            'messages' => $messages,
+            'messagesempty' => empty($messages),
+            'totalunreadconversations' => $totalunreadconversations,
         ];
     }
 }

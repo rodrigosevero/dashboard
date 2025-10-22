@@ -1,4 +1,4 @@
-.pp-container{max-width:1100px;margin:1rem auto;padding:0 1rem;}
+.pp-container{max-width:1200px;margin:1rem auto;padding:0 1rem;}
 .pp-header h2{margin:0 0 .25rem 0;}
 .pp-header p{margin:0 0 1rem 0;color:#6b7280;}
 .pp-grid{display:grid;grid-template-columns:1fr;gap:16px;}
@@ -26,3 +26,20 @@
 .pp-banner-image{width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:transform 0.2s ease,box-shadow 0.2s ease;}
 .pp-banner-link:hover .pp-banner-image{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.15);}
 .pp-banner-image:not(.pp-banner-link .pp-banner-image):hover{transform:translateY(-1px);}
+
+/* Mensagens */
+.pp-messages-summary{margin-bottom:12px;padding:8px 12px;background:#f0f9ff;border-radius:8px;border:1px solid #bae6fd;}
+.pp-total-conversations{margin:0;font-size:0.9rem;color:#0369a1;font-weight:500;}
+.pp-message-item{display:block;padding:12px;margin:6px 0;border-radius:12px;text-decoration:none;border:1px solid #eef0f4;transition:all 0.2s ease;}
+.pp-message-item:hover{background:#f9fafb;border-color:#d1d5db;transform:translateY(-1px);}
+.pp-message-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.pp-message-name{font-weight:600;color:#1f2937;}
+.pp-message-unread{background:#ef4444;color:white;font-size:0.75rem;padding:2px 6px;border-radius:10px;font-weight:500;}
+.pp-message-preview{color:#6b7280;font-size:0.875rem;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pp-message-sender{font-weight:600;color:#374151;}
+.pp-message-time{color:#9ca3af;font-size:0.75rem;}
+
+@media (max-width: 768px) {
+    .pp-grid{grid-template-columns:1fr;}
+    .pp-container{padding:0 0.5rem;}
+}
