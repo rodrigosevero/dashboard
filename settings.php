@@ -28,10 +28,12 @@ if ($hassiteconfig) {
         get_string('banners_heading_desc', 'local_dashboard')));
     
     // Banner 1
-    $settings->add(new admin_setting_configtext('local_dashboard/banner1_url',
+    $settings->add(new admin_setting_configstoredfile('local_dashboard/banner1_file',
         get_string('banner1_url', 'local_dashboard'),
-        get_string('banner_url_desc', 'local_dashboard'),
-        '', PARAM_URL));
+        get_string('banner_file_desc', 'local_dashboard'),
+        'banner1',
+        0,
+        array('maxfiles' => 1, 'accepted_types' => array('.jpg', '.jpeg', '.png', '.gif', '.webp'))));
     
     $settings->add(new admin_setting_configtext('local_dashboard/banner1_alt',
         get_string('banner1_alt', 'local_dashboard'),
@@ -44,10 +46,12 @@ if ($hassiteconfig) {
         '', PARAM_URL));
     
     // Banner 2
-    $settings->add(new admin_setting_configtext('local_dashboard/banner2_url',
+    $settings->add(new admin_setting_configstoredfile('local_dashboard/banner2_file',
         get_string('banner2_url', 'local_dashboard'),
-        get_string('banner_url_desc', 'local_dashboard'),
-        '', PARAM_URL));
+        get_string('banner_file_desc', 'local_dashboard'),
+        'banner2',
+        0,
+        array('maxfiles' => 1, 'accepted_types' => array('.jpg', '.jpeg', '.png', '.gif', '.webp'))));
     
     $settings->add(new admin_setting_configtext('local_dashboard/banner2_alt',
         get_string('banner2_alt', 'local_dashboard'),
@@ -60,10 +64,12 @@ if ($hassiteconfig) {
         '', PARAM_URL));
     
     // Banner 3
-    $settings->add(new admin_setting_configtext('local_dashboard/banner3_url',
+    $settings->add(new admin_setting_configstoredfile('local_dashboard/banner3_file',
         get_string('banner3_url', 'local_dashboard'),
-        get_string('banner_url_desc', 'local_dashboard'),
-        '', PARAM_URL));
+        get_string('banner_file_desc', 'local_dashboard'),
+        'banner3',
+        0,
+        array('maxfiles' => 1, 'accepted_types' => array('.jpg', '.jpeg', '.png', '.gif', '.webp'))));
     
     $settings->add(new admin_setting_configtext('local_dashboard/banner3_alt',
         get_string('banner3_alt', 'local_dashboard'),
@@ -76,10 +82,12 @@ if ($hassiteconfig) {
         '', PARAM_URL));
     
     // Banner 4
-    $settings->add(new admin_setting_configtext('local_dashboard/banner4_url',
+    $settings->add(new admin_setting_configstoredfile('local_dashboard/banner4_file',
         get_string('banner4_url', 'local_dashboard'),
-        get_string('banner_url_desc', 'local_dashboard'),
-        '', PARAM_URL));
+        get_string('banner_file_desc', 'local_dashboard'),
+        'banner4',
+        0,
+        array('maxfiles' => 1, 'accepted_types' => array('.jpg', '.jpeg', '.png', '.gif', '.webp'))));
     
     $settings->add(new admin_setting_configtext('local_dashboard/banner4_alt',
         get_string('banner4_alt', 'local_dashboard'),

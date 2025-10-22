@@ -25,6 +25,7 @@ $string['banner2_url'] = 'Banner 2 - URL da Imagem';
 $string['banner3_url'] = 'Banner 3 - URL da Imagem';
 $string['banner4_url'] = 'Banner 4 - URL da Imagem';
 $string['banner_url_desc'] = 'URL completa da imagem (ex: https://site.com/imagem.jpg)';
+$string['banner_file_desc'] = 'Faça upload de uma imagem para o banner (formatos aceitos: JPG, PNG, GIF, WebP)';
 $string['banner1_alt'] = 'Banner 1 - Texto Alternativo';
 $string['banner2_alt'] = 'Banner 2 - Texto Alternativo';
 $string['banner3_alt'] = 'Banner 3 - Texto Alternativo';

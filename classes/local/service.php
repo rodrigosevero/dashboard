@@ -7,6 +7,7 @@ class service {
     public static function get_dashboard_data(\stdClass $user): array {
         global $CFG, $DB;
         require_once($CFG->libdir . '/enrollib.php');
+        require_once($CFG->dirroot . '/lib/filelib.php');
 
         // Cursos em andamento do usuário com categorias.
         $courses = enrol_get_users_courses($user->id, true, 'id,shortname,fullname,startdate,enddate,visible,category');
@@ -65,18 +66,28 @@ class service {
         // Banners/Imagens configuráveis
         $banners = [];
         for ($i = 1; $i <= 4; $i++) {
-            $banner_url = get_config('local_dashboard', "banner{$i}_url");
+            $banner_file = get_config('local_dashboard', "banner{$i}_file");
             $banner_alt = get_config('local_dashboard', "banner{$i}_alt");
             $banner_link = get_config('local_dashboard', "banner{$i}_link");
             
-            if (!empty($banner_url)) {
-                $banners[] = [
-                    'url' => $banner_url,
-                    'alt' => $banner_alt ?: "Banner {$i}",
-                    'link' => $banner_link ?: '#',
-                    'haslink' => !empty($banner_link),
-                    'number' => $i
-                ];
+            if (!empty($banner_file)) {
+                // Gera URL do arquivo
+                $syscontext = \context_system::instance();
+                $fs = get_file_storage();
+                $files = $fs->get_area_files($syscontext->id, 'local_dashboard', "banner{$i}", 0, 'sortorder', false);
+                
+                if (!empty($files)) {
+                    $file = reset($files);
+                    $banner_url = $CFG->wwwroot . '/pluginfile.php/' . $syscontext->id . '/local_dashboard/banner' . $i . '/0/' . $file->get_filename();
+                    
+                    $banners[] = [
+                        'url' => $banner_url,
+                        'alt' => $banner_alt ?: "Banner {$i}",
+                        'link' => $banner_link ?: '#',
+                        'haslink' => !empty($banner_link),
+                        'number' => $i
+                    ];
+                }
             }
         }
 
