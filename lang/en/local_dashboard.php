@@ -1,7 +1,7 @@
 <?php
 $string['pluginname'] = 'Academic Hub';
-$string['enabledredirect'] = 'Redirect students after login';
-$string['enabledredirect_desc'] = 'When enabled, students are redirected to this landing after login.';
+$string['enabledredirect'] = 'Redirect users after login';
+$string['enabledredirect_desc'] = 'When enabled, users are redirected to the dashboard after login (except site administrators).';
 $string['welcome_title'] = 'Welcome';
 $string['welcome_sub'] = 'Your classes, deadlines and messages in one place.';
 $string['mycourses'] = 'My courses';

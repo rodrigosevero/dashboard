@@ -1,7 +1,7 @@
 <?php
 $string['pluginname'] = 'Portal Acadêmico Inteligente';
-$string['enabledredirect'] = 'Redirecionar alunos após o login';
-$string['enabledredirect_desc'] = 'Quando habilitado, alunos serão redirecionados para esta landing após o login.';
+$string['enabledredirect'] = 'Redirecionar usuários após o login';
+$string['enabledredirect_desc'] = 'Quando habilitado, usuários serão redirecionados para o dashboard após o login (exceto administradores do site).';
 $string['welcome_title'] = 'Bem-vindo(a)';
 $string['welcome_sub'] = 'Suas disciplinas, prazos e mensagens em um só lugar.';
 $string['mycourses'] = 'Minhas Disciplinas';
