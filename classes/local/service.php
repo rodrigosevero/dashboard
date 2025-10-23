@@ -180,6 +180,7 @@ class service {
             'messages' => $messages,
             'messagesempty' => empty($messages),
             'totalunreadconversations' => $totalunreadconversations,
+            'allmessagesurl' => $CFG->wwwroot . '/message/index.php',
         ];
     }
 }
