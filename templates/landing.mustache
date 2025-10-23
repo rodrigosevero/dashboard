@@ -31,13 +31,13 @@
         <a class="pp-message-item" href="{{url}}">
           <div class="pp-message-header">
             <span class="pp-message-name">{{name}}</span>
-            {{#unread}}<span class="pp-message-unread">{{unreadcount}}</span>{{/unread}}
+            <span class="pp-message-unread">{{unreadcount}}</span>
           </div>
           <div class="pp-message-preview"><span class="pp-message-sender">{{sendername}}</span>{{lastmessage}}</div>
           <div class="pp-message-time">{{timeago}}</div>
         </a>
       {{/messages}}
-      {{#messagesempty}}<p class="pp-empty">Nenhuma conversa encontrada.</p>{{/messagesempty}}
+      {{#messagesempty}}<p class="pp-empty">Nenhuma mensagem não lida.</p>{{/messagesempty}}
     </section>
 
     <!-- Calendário Acadêmico -->

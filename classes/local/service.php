@@ -108,9 +108,18 @@ class service {
                 }
             }
             
-            // Buscar detalhes das últimas 5 conversas (independente de serem lidas)
+            // Buscar apenas as conversas com mensagens não lidas (limitando a 5)
             // As conversas já vêm ordenadas por última atividade
-            foreach (array_slice($conversations, 0, 5) as $conversation) {
+            $unreadConversations = array_filter($conversations, function($conversation) {
+                return $conversation->unreadcount > 0;
+            });
+            
+            foreach (array_slice($unreadConversations, 0, 5) as $conversation) {
+                // Verificar se o usuário ainda tem acesso à conversa
+                if (!\core_message\api::is_user_in_conversation($user->id, $conversation->id)) {
+                    continue;
+                }
+                
                 $members = \core_message\api::get_conversation_members($user->id, $conversation->id);
                 
                 // Encontrar o outro usuário na conversa
@@ -146,6 +155,9 @@ class service {
                         }
                     }
                     
+                    // Gerar URL correta para a conversa
+                    $conversation_url = $CFG->wwwroot . '/message/index.php?convid=' . $conversation->id;
+                    
                     $messages[] = [
                         'id' => $conversation->id,
                         'name' => fullname($otheruser),
@@ -154,7 +166,7 @@ class service {
                         'timeago' => $lastmessage ? userdate($lastmessage->timecreated, get_string('strftimerecent')) : '',
                         'unread' => $conversation->unreadcount > 0, // True se tem mensagens não lidas
                         'unreadcount' => $conversation->unreadcount,
-                        'url' => $CFG->wwwroot . '/message/index.php?id=' . $otheruser->id
+                        'url' => $conversation_url
                     ];
                 }
             }
