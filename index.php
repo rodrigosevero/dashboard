@@ -7,7 +7,8 @@ $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/dashboard/index.php'));
 $PAGE->set_pagelayout('mydashboard');
 $PAGE->set_title(get_string('pluginname', 'local_dashboard'));
-$PAGE->set_heading(get_string('pluginname', 'local_dashboard'));
+// Remover o heading para não exibir "Portal Acadêmico Inteligente"
+// $PAGE->set_heading(get_string('pluginname', 'local_dashboard'));
 
 $PAGE->requires->css('/local/dashboard/styles.css');
 
