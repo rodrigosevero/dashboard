@@ -1,5 +1,5 @@
 <?php
-$string['pluginname'] = 'Portal Acadêmico Inteligente';
+$string['pluginname'] = 'Portal Acadêmico';
 $string['enabledredirect'] = 'Redirecionar usuários após o login';
 $string['enabledredirect_desc'] = 'Quando habilitado, usuários serão redirecionados para o dashboard após o login (exceto administradores do site).';
 $string['welcome_title'] = 'Bem-vindo(a)';

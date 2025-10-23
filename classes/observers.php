@@ -12,12 +12,6 @@ class observers {
         return;
     }
 
-    $ctx = \context_system::instance();
-    // Só não redirecionar administradores do site (que podem configurar o site)
-    if (\has_capability('moodle/site:config', $ctx, $USER)) {
-      return;
-    }
-
     // Verificar se não é um usuário guest
     if (isguestuser($USER)) {
         return;
