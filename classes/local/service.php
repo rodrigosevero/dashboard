@@ -47,53 +47,13 @@ class service {
             ];
         }
 
-        // Informações e Avisos importantes - usando apenas configuração fallback
-        $announcements = [];
-        
-        $fallback = get_config('local_dashboard', 'announcementsfallback');
-        if (!empty($fallback)) {
-            // Processa HTML no fallback
-            $fallback_text = format_text($fallback['text'] ?? $fallback, FORMAT_HTML, ['context' => \context_system::instance()]);
-            $announcements[] = [
-                'title' => get_string('important_info', 'local_dashboard'),
-                'excerpt' => shorten_text(strip_tags($fallback_text), 140),
-                'fulltext' => $fallback_text, // Texto completo com HTML
-                'time' => userdate(time(), get_string('strftimedatetime', 'langconfig')),
-                'url' => '#'
-            ];
-        }
-
-        // Banners/Imagens configuráveis
-        $banners = [];
-        for ($i = 1; $i <= 4; $i++) {
-            $banner_file = get_config('local_dashboard', "banner{$i}_file");
-            $banner_alt = get_config('local_dashboard', "banner{$i}_alt");
-            $banner_link = get_config('local_dashboard', "banner{$i}_link");
-            
-            if (!empty($banner_file)) {
-                // Gera URL do arquivo
-                $syscontext = \context_system::instance();
-                $fs = get_file_storage();
-                $files = $fs->get_area_files($syscontext->id, 'local_dashboard', "banner{$i}", 0, 'sortorder', false);
-                
-                if (!empty($files)) {
-                    $file = reset($files);
-                    $banner_url = $CFG->wwwroot . '/pluginfile.php/' . $syscontext->id . '/local_dashboard/banner' . $i . '/0/' . $file->get_filename();
-                    
-                    $banners[] = [
-                        'url' => $banner_url,
-                        'alt' => $banner_alt ?: "Banner {$i}",
-                        'link' => $banner_link ?: '#',
-                        'haslink' => !empty($banner_link),
-                        'number' => $i
-                    ];
-                }
-            }
-        }
+        // Calendário Acadêmico (substitui anúncios)
+        $calendario = self::get_calendario_data($user);
 
         // Mensagens do usuário
         $messages = [];
         $totalunreadconversations = 0;
+
         
         if (file_exists($CFG->dirroot . '/message/lib.php')) {
             require_once($CFG->dirroot . '/message/lib.php');
@@ -175,12 +135,45 @@ class service {
         return [
             'courses' => $coursesarr,
             'coursesempty' => empty($coursesarr),
-            'announcements' => $announcements,
-            'banners' => $banners,
+            'calendario' => $calendario,
+            'hascalendario' => !empty($calendario['hassemestres']),
             'messages' => $messages,
             'messagesempty' => empty($messages),
             'totalunreadconversations' => $totalunreadconversations,
             'allmessagesurl' => $CFG->wwwroot . '/message/index.php',
         ];
     }
+    
+    /**
+     * Get calendario academico data if plugin is available
+     *
+     * @param \stdClass $user User object
+     * @return array Calendario widget data
+     */
+    private static function get_calendario_data(\stdClass $user): array {
+        global $CFG;
+        
+        // Check if report_calendario plugin exists
+        $calendario_lib = $CFG->dirroot . '/report/calendario/lib.php';
+        if (!file_exists($calendario_lib)) {
+            return ['hassemestres' => false];
+        }
+        
+        require_once($calendario_lib);
+        
+        // Check if user has view capability
+        $context = \context_system::instance();
+        if (!has_capability('report/calendario:view', $context, $user->id)) {
+            return ['hassemestres' => false];
+        }
+        
+        // Check if function exists
+        if (!function_exists('report_calendario_get_widget_data')) {
+            return ['hassemestres' => false];
+        }
+        
+        // Get widget data - show all active semesters, both types
+        return report_calendario_get_widget_data($user->id, 0, true, true);
+    }
 }
+

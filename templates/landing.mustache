@@ -45,37 +45,146 @@
     </section>
 
     <!-- Calendário Acadêmico -->
-    <section class="pp-card">
-      <h3>📅 {{#str}} announcements, local_dashboard {{/str}}</h3>
+    <section class="pp-card pp-card-calendario">
+      <h3>📅 {{#str}} calendario, local_dashboard {{/str}}</h3>
       
-      <!-- Conteúdo de texto/mensagem -->
-      {{#announcements}}
-        <div class="pp-announcement-content">          
-          <div class="pp-announcement-text">{{{fulltext}}}</div>
-          <p class="pp-announcement-time">{{time}}</p>
+      {{#hascalendario}}
+        <!-- Filtros -->
+        <div class="cw-filters">
+          <div class="cw-filter-group">
+            <label for="cw-semestre-filter">Semestre:</label>
+            <select id="cw-semestre-filter" class="cw-select" onchange="window.location.href='?semestre_id=' + this.value">
+              <option value="0">Todos</option>
+              {{#calendario.semestre_options}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{nome}}</option>
+              {{/calendario.semestre_options}}
+            </select>
+          </div>
+          <div class="cw-filter-check">
+            <input type="checkbox" id="cw-filter-regular" checked disabled>
+            <label for="cw-filter-regular">Regulares</label>
+          </div>
+          <div class="cw-filter-check">
+            <input type="checkbox" id="cw-filter-reoferta" checked disabled>
+            <label for="cw-filter-reoferta">Reofertas</label>
+          </div>
         </div>
-      {{/announcements}}
-      
-      <!-- Banners/Imagens (após a mensagem) -->
-      {{#banners}}
-        <div class="pp-banner-container">
-          {{#haslink}}
-            <a href="{{link}}" target="_blank" rel="noopener" class="pp-banner-link">
-              <img src="{{url}}" alt="{{alt}}" class="pp-banner-image" loading="lazy">
-            </a>
-          {{/haslink}}
-          {{^haslink}}
-            <img src="{{url}}" alt="{{alt}}" class="pp-banner-image" loading="lazy">
-          {{/haslink}}
+        
+        <!-- Widget do Calendário -->
+        {{#calendario.semestres}}
+          <div class="cw-semestre">
+            <div class="cw-semestre-header" style="background-color: {{cor_fundo}}; color: {{cor_texto}};">
+              <h4 class="cw-semestre-titulo">{{nome}}</h4>
+            </div>
+            
+            <div class="cw-timeline-container">
+              <!-- Desktop: Timeline Table -->
+              <table class="cw-timeline-table d-none d-md-table">
+                <thead>
+                  <tr>
+                    <th class="cw-th-disciplina">Disciplina</th>
+                    {{#meses}}
+                      <th class="cw-th-mes" title="{{nome_completo}}">{{nome}}</th>
+                    {{/meses}}
+                    <th class="cw-th-horario">Aulas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#disciplinas}}
+                    <tr class="cw-disciplina-row" 
+                        data-toggle="tooltip" 
+                        data-html="true"
+                        data-placement="top"
+                        title="<strong>{{nome}}</strong>{{#codigo}}<br>Código: {{codigo}}{{/codigo}}{{#professor}}<br>Prof: {{professor}}{{/professor}}{{#cargahoraria}}<br>CH: {{cargahoraria}}h{{/cargahoraria}}{{#sala}}<br>Sala: {{sala}}{{/sala}}{{#is_reoferta}}<br><span class='badge badge-warning'>Reoferta</span>{{/is_reoferta}}">
+                      <td class="cw-td-disciplina" style="background-color: {{cor}}; color: {{cor_texto}};">
+                        <div class="cw-disc-nome">{{nome}}</div>
+                        {{#codigo}}<div class="cw-disc-codigo">{{codigo}}</div>{{/codigo}}
+                        {{#is_reoferta}}<span class="cw-badge-reoferta">R</span>{{/is_reoferta}}
+                      </td>
+                      {{#meses_timeline}}
+                        <td class="cw-td-timeline">
+                          {{#ativo}}
+                            <div class="cw-timeline-bar" 
+                                 style="left: {{pos_inicio}}%; width: {{largura}}%; background-color: {{cor}};">
+                              {{#eh_inicio}}<span class="cw-dia-marker cw-dia-inicio">{{dia_inicio}}</span>{{/eh_inicio}}
+                              {{#eh_fim}}<span class="cw-dia-marker cw-dia-fim">{{dia_fim}}</span>{{/eh_fim}}
+                            </div>
+                          {{/ativo}}
+                        </td>
+                      {{/meses_timeline}}
+                      <td class="cw-td-horario">
+                        {{#horario}}<span class="cw-horario-text">{{horario}}</span>{{/horario}}
+                        {{^horario}}<span class="cw-horario-empty">-</span>{{/horario}}
+                      </td>
+                    </tr>
+                  {{/disciplinas}}
+                </tbody>
+              </table>
+              
+              <!-- Mobile: Card List -->
+              <div class="cw-mobile-list d-md-none">
+                {{#disciplinas}}
+                  <div class="cw-mobile-card" style="border-left-color: {{cor}};">
+                    <div class="cw-mobile-header">
+                      <div class="cw-mobile-nome" style="color: {{cor}};">
+                        {{nome}}
+                        {{#is_reoferta}}<span class="cw-badge-reoferta">R</span>{{/is_reoferta}}
+                      </div>
+                      {{#codigo}}<div class="cw-mobile-codigo">{{codigo}}</div>{{/codigo}}
+                    </div>
+                    <div class="cw-mobile-details">
+                      {{#professor}}<div class="cw-mobile-info"><i class="fa fa-user"></i> {{professor}}</div>{{/professor}}
+                      {{#datainicio_fmt}}
+                        <div class="cw-mobile-info"><i class="fa fa-calendar"></i> {{datainicio_fmt}} - {{datafim_fmt}}</div>
+                      {{/datainicio_fmt}}
+                      {{#horario}}<div class="cw-mobile-info"><i class="fa fa-clock-o"></i> {{horario}}</div>{{/horario}}
+                      {{#sala}}<div class="cw-mobile-info"><i class="fa fa-map-marker"></i> {{sala}}</div>{{/sala}}
+                    </div>
+                    <!-- Mini timeline bar -->
+                    <div class="cw-mobile-timeline">
+                      <div class="cw-mobile-timeline-track">
+                        {{#meses_timeline}}
+                          <div class="cw-mobile-timeline-segment {{#ativo}}active{{/ativo}}" 
+                               style="{{#ativo}}background-color: {{cor}};{{/ativo}}"></div>
+                        {{/meses_timeline}}
+                      </div>
+                    </div>
+                  </div>
+                {{/disciplinas}}
+              </div>
+            </div>
+          </div>
+        {{/calendario.semestres}}
+        
+        <!-- Footer com links -->
+        <div class="cw-footer">
+          <a href="{{calendario.fullcalendarurl}}" class="pp-btn-secondary">Ver calendário completo</a>
+          {{#calendario.canmanage}}
+            <a href="{{calendario.manageurl}}" class="pp-btn-primary">Gerenciar</a>
+          {{/calendario.canmanage}}
         </div>
-      {{/banners}}
+      {{/hascalendario}}
       
-      <!-- Mensagem de fallback apenas se não houver nem announcements nem banners -->
-      {{^announcements}}
-        {{^banners}}
-          <p class="pp-empty">{{#str}} noann, local_dashboard {{/str}}</p>
-        {{/banners}}
-      {{/announcements}}
+      {{^hascalendario}}
+        <div class="cw-empty">
+          <i class="fa fa-calendar-o fa-3x"></i>
+          <p>{{#str}} nocalendario, local_dashboard {{/str}}</p>
+          {{#calendario.canmanage}}
+            <a href="{{calendario.manageurl}}" class="btn btn-primary btn-sm">Configurar Calendário</a>
+          {{/calendario.canmanage}}
+        </div>
+      {{/hascalendario}}
     </section>
   </div>
 </div>
+
+{{#js}}
+require(['jquery'], function($) {
+    // Initialize tooltips for hover details on calendar
+    $('[data-toggle="tooltip"]').tooltip({
+        container: 'body',
+        trigger: 'hover'
+    });
+});
+{{/js}}
+

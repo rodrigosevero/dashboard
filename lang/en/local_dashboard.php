@@ -11,31 +11,20 @@ $string['noevents'] = 'No events for the next days.';
 $string['nocourses'] = 'No active enrolments found.';
 $string['messages'] = 'Messages';
 $string['unread_hint'] = 'Unread conversations.';
-$string['announcements'] = 'Academic Calendar';
-$string['noann'] = 'Please configure a message in the plugin settings.';
-$string['important_info'] = 'Important information';
-$string['announcementsfallback'] = 'Important information content';
-$string['announcementsfallback_desc'] = 'Enter here the content that will be displayed in the "Important information" card. Supports HTML, rich formatting and image uploads through the editor.';
 
-// Banners/Images
-$string['banners_heading'] = 'Banners and Images';
-$string['banners_heading_desc'] = 'Configure up to 4 banners/images that will be displayed in the important information card.';
-$string['banner1_url'] = 'Banner 1 - Image URL';
-$string['banner2_url'] = 'Banner 2 - Image URL';
-$string['banner3_url'] = 'Banner 3 - Image URL';
-$string['banner4_url'] = 'Banner 4 - Image URL';
-$string['banner_url_desc'] = 'Full image URL (e.g.: https://site.com/image.jpg)';
-$string['banner_file_desc'] = 'Upload an image for the banner (accepted formats: JPG, PNG, GIF, WebP)';
-$string['banner1_alt'] = 'Banner 1 - Alternative Text';
-$string['banner2_alt'] = 'Banner 2 - Alternative Text';
-$string['banner3_alt'] = 'Banner 3 - Alternative Text';
-$string['banner4_alt'] = 'Banner 4 - Alternative Text';
-$string['banner_alt_desc'] = 'Alternative text for accessibility (describe the image)';
-$string['banner1_link'] = 'Banner 1 - Destination Link (optional)';
-$string['banner2_link'] = 'Banner 2 - Destination Link (optional)';
-$string['banner3_link'] = 'Banner 3 - Destination Link (optional)';
-$string['banner4_link'] = 'Banner 4 - Destination Link (optional)';
-$string['banner_link_desc'] = 'URL where the banner should lead when clicked (leave empty if not clickable)';
+// Academic Calendar
+$string['calendario'] = 'Academic Calendar';
+$string['nocalendario'] = 'No academic calendar configured.';
+$string['calendario_view_full'] = 'View full calendar';
+$string['calendario_manage'] = 'Manage calendar';
+$string['calendario_filter_semestre'] = 'Semester';
+$string['calendario_filter_all'] = 'All';
+$string['calendario_regular'] = 'Regular';
+$string['calendario_reoferta'] = 'Re-offer';
+
+// Support
+$string['support_heading'] = 'Support Settings';
+$string['support_heading_desc'] = 'Configure technical support contact information.';
 $string['support'] = 'Technical support';
 $string['supportname'] = 'Support name';
 $string['supportemail'] = 'Support email';
