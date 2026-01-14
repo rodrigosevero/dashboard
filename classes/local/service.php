@@ -161,11 +161,8 @@ class service {
         
         require_once($calendario_lib);
         
-        // Check if user has view capability
-        $context = \context_system::instance();
-        if (!has_capability('report/calendario:view', $context, $user->id)) {
-            return ['hassemestres' => false];
-        }
+        // Note: View capability check removed - calendar is visible to all logged-in users
+        // The manage capability is still checked inside report_calendario_get_widget_data
         
         // Check if function exists
         if (!function_exists('report_calendario_get_widget_data')) {
